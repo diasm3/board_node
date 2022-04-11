@@ -3,6 +3,8 @@ import UserSchema from "../models/UserSchema.js"
 import BoardSchema from "../models/BoardSchema.js"
 import CommentSchema from "../models/CommentSchema.js"
 import increment from "../middleware/increment.js"
+import IncSchema from "../models/IncSchema.js"
+import currentNum from "../middleware/currentNum.js"
 const router = Router()
 
 // 게시물 관련 API
@@ -12,8 +14,8 @@ const router = Router()
 router.get("/list", async (req, res) => {
   console.log("/list")
   try {
-    const board = await BoardSchema.find({}).sort({ createdat: -1 }).lean()
-    console.log(board)
+    const board = await BoardSchema.find({}).sort({ createdAt: -1 }).lean()
+
     res.render("board/board.hbs", { board })
   } catch (err) {
     console.error(err)
@@ -52,7 +54,10 @@ router.post("/write", increment, async (req, res) => {
 router.get("/read/:number", async (req, res) => {
   try {
     const read = await BoardSchema.findOne({ number: req.params.number }).lean()
-    res.render("board/read", { read })
+    const comment = await CommentSchema.find({
+      articleNumber: req.params.number,
+    }).sort({createdAt : -1}).lean()
+    res.render("board/read", { read, comment })
   } catch (err) {
     console.error(err)
   }
@@ -93,27 +98,49 @@ router.put("/edit/:number", async (req, res) => {
 // @Route : DELETE /api/delete/:number
 // @Param : number
 router.delete("/delete/:number", async (req, res) => {
-    try {
-        await BoardSchema.remove({ number: req.params.number })
-        res.redirect("/api/list")
-
-    } catch(err){
-        console.error(err)
-    }
-    
+  try {
+    await BoardSchema.remove({ number: req.params.number })
+    res.redirect("/api/list")
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 // @Desc : 코멘트 조회
 // @Route : GET /api/commentRead/:articleNumber
 // @Param : articleNumber
 // @Rules : 작성 날짜 기준으로 내림차순
-router.get("/commentRead/:articleNumber")
+router.get("/commentRead/:articleNumber", async (req, res) => {
+  try {
+  } catch (err) {
+    console.error(err)
+  }
+})
 
 // @Desc :  코멘트 작성
 // @Route : POST /api/commentWrite
 // @Param :  writer, body
 // @Rules : if body is None "댓글 내용을 입력해주세요" return
-router.post("/commentWrite")
+router.post("/commentWrite/:articleNumber", increment, async (req, res) => {
+  try {
+    if (req.body.body && req.body.writer) {
+      await CommentSchema.create(
+        Object.assign(req.body, {
+          articleNumber: req.params.articleNumber,
+          commentNum: res.locals.count,
+        })
+      )
+
+      res.redirect("/api/read/" + req.params.articleNumber)
+    } else {
+    // res.write("<script>alert('댓글을 입력해주세요')</script>")
+    // res.redirect("/api/read/" + req.params.articleNumber)
+    }
+  } catch (err) {
+    console.error(err)
+    // res.redirect("/api/read/" + req.params.articleNumber)
+  }
+})
 
 // @Desc : 코멘트 수정
 // @Route : PUT /api/commentEdit/:commentNumber
@@ -122,8 +149,22 @@ router.post("/commentWrite")
 router.put("/commentEdit/:commnetNumber")
 
 // @Desc : 코멘트 삭제
-// @Route : PUT /api/edit/:number
+// @Route : PUT /api/commentDelete/:commentnumber
 // @Param : number
-router.delete("/commentDelete/:commnetNumber")
+router.delete("/commentDelete/:commnetNum", async(req, res) => {
+    try {
+        console.log(req.params.commnetNum)
+        await CommentSchema.remove({ commentNum: req.params.commnetNum })
+        res.redirect("/api/list")  
+
+
+    } catch(err){
+
+        console.error(er)
+
+
+    }
+
+})
 
 export default router

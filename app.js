@@ -29,9 +29,6 @@ dotenv.config({ path: "./config/config.env" })
 app.use(morgan("dev"))
 app.use(express.urlencoded({ extended: false }))
 app.use(methodOverride(function (req, res){ 
-      console.log("method override")
-      console.log(req.body)
-      console.log(req.body && typeof req.body)
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
       let method = req.body._method
       delete req.body._method

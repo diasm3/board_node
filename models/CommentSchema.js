@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const CommentSchema = new mongoose.Schema({
-    commnetNumber: {
+    commentNum: {
         type: Number,
     },
     body: {
@@ -10,12 +10,10 @@ const CommentSchema = new mongoose.Schema({
         trime: true,
     },
     writer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'UserChema',
+        type : String,
     },
     articleNumber: {
         type: Number,
-        ref : 'BoardSchema',
     },
     createdAt: {
         type : Date,
