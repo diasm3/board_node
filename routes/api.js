@@ -1,10 +1,7 @@
 import { Router } from "express"
-import UserSchema from "../models/UserSchema.js"
 import BoardSchema from "../models/BoardSchema.js"
 import CommentSchema from "../models/CommentSchema.js"
 import increment from "../middleware/increment.js"
-import IncSchema from "../models/IncSchema.js"
-import currentNum from "../middleware/currentNum.js"
 const router = Router()
 
 // 게시물 관련 API
@@ -34,17 +31,20 @@ router.get("/write", (req, res) => {
 // @Param : title, body, writer
 router.post("/write", increment, async (req, res) => {
   try {
-    await BoardSchema.create(
-      Object.assign(req.body, { number: res.locals.count })
-    )
-
     if (req.body.title && req.body.body && req.body.writer) {
+      await BoardSchema.create(
+        Object.assign(req.body, { number: res.locals.count })
+      )
       res.redirect("/api/list")
+    } else {
+      // expection 처리
+      res.write("<script>alert('please checking title and context')</script>")
+      res.write('<script>window.location="../api/list"</script>')
     }
   } catch (err) {
     console.error(err)
     //error page validate
-    //res.redirect("error/404.hbs")
+    res.render("error/404.hbs")
   }
 })
 
@@ -53,13 +53,23 @@ router.post("/write", increment, async (req, res) => {
 // @Param : number
 router.get("/read/:number", async (req, res) => {
   try {
-    const read = await BoardSchema.findOne({ number: req.params.number }).lean()
-    const comment = await CommentSchema.find({
-      articleNumber: req.params.number,
-    }).sort({createdAt : -1}).lean()
-    res.render("board/read", { read, comment })
+    if (req.params.number) {
+      const read = await BoardSchema.findOne({
+        number: req.params.number,
+      }).lean()
+      const comment = await CommentSchema.find({
+        articleNumber: req.params.number,
+      })
+        .sort({ createdAt: -1 })
+        .lean()
+      res.render("board/read", { read, comment })
+    } else {
+      res.write("<script>alert('something worng with your mind')</script>")
+      res.write('<script>window.location="../api/list"</script>')
+    }
   } catch (err) {
     console.error(err)
+    res.render("error/404.hbs")
   }
 })
 
@@ -72,6 +82,7 @@ router.get("/edit/:number", async (req, res) => {
     res.render("board/edit", { edit })
   } catch (err) {
     console.error(err)
+    res.render("error/404.hbs")
   }
 })
 
@@ -91,6 +102,7 @@ router.put("/edit/:number", async (req, res) => {
     res.redirect("/api/list")
   } catch (err) {
     console.error(err)
+    res.render("error/404.hbs")
   }
 })
 
@@ -103,24 +115,13 @@ router.delete("/delete/:number", async (req, res) => {
     res.redirect("/api/list")
   } catch (err) {
     console.error(err)
-  }
-})
-
-// @Desc : 코멘트 조회
-// @Route : GET /api/commentRead/:articleNumber
-// @Param : articleNumber
-// @Rules : 작성 날짜 기준으로 내림차순
-router.get("/commentRead/:articleNumber", async (req, res) => {
-  try {
-  } catch (err) {
-    console.error(err)
+    res.render("error/404.hbs")
   }
 })
 
 // @Desc :  코멘트 작성
 // @Route : POST /api/commentWrite
-// @Param :  writer, body
-// @Rules : if body is None "댓글 내용을 입력해주세요" return
+// @Param :  writer, body // @Rules : if body is None "댓글 내용을 입력해주세요" return
 router.post("/commentWrite/:articleNumber", increment, async (req, res) => {
   try {
     if (req.body.body && req.body.writer) {
@@ -133,12 +134,31 @@ router.post("/commentWrite/:articleNumber", increment, async (req, res) => {
 
       res.redirect("/api/read/" + req.params.articleNumber)
     } else {
-    // res.write("<script>alert('댓글을 입력해주세요')</script>")
-    // res.redirect("/api/read/" + req.params.articleNumber)
+      res.write("<script>alert('something worng with your mind')</script>")
+      res.write(`<script>window.location="../read/${req.params.articleNumber}"</script>`)
     }
   } catch (err) {
     console.error(err)
-    // res.redirect("/api/read/" + req.params.articleNumber)
+    res.render("error/404.hbs")
+  }
+})
+
+// @Desc : 코멘트 수정 페이지
+// @Route : GET /api/commentEdit/:commentNumber
+// @Param : commentNumber, body
+// @Rules : if body is None "댓글 내용을 입력해주세요" return
+router.get("/commentEdit/:commentNum", async (req, res) => {
+  try {
+    if (req.params.commentNum) {
+      const comment = await CommentSchema.findOne({
+        commentNum: req.params.commentNum,
+      }).lean()
+      res.render("board/comment", { comment })
+    } else {
+    }
+  } catch (err) {
+    console.error(err)
+    res.render("error/404.hbs")
   }
 })
 
@@ -146,25 +166,43 @@ router.post("/commentWrite/:articleNumber", increment, async (req, res) => {
 // @Route : PUT /api/commentEdit/:commentNumber
 // @Param : commentNumber, body
 // @Rules : if body is None "댓글 내용을 입력해주세요" return
-router.put("/commentEdit/:commnetNumber")
+router.put("/commentEdit/:commentNum", async (req, res) => {
+  try {
+      if(req.body.body && req.body.writer){
+    await CommentSchema.findOneAndUpdate(
+      { commentNum: req.params.commentNum },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    )
+    res.redirect("/api/list")
+      } else{
+          res.write("<script>alert('please input data both of them')</script>")
+          res.write('<script>window.location="../api/list"</script>')
+
+      }
+  } catch (err) {
+    console.error(err)
+  }
+})
 
 // @Desc : 코멘트 삭제
 // @Route : PUT /api/commentDelete/:commentnumber
 // @Param : number
-router.delete("/commentDelete/:commnetNum", async(req, res) => {
-    try {
-        console.log(req.params.commnetNum)
-        await CommentSchema.remove({ commentNum: req.params.commnetNum })
-        res.redirect("/api/list")  
-
-
-    } catch(err){
-
-        console.error(er)
-
-
+router.delete("/commentDelete/:commentNum", async (req, res) => {
+  try {
+    if (req.params.commentNum) {
+    await CommentSchema.remove({ commentNum: req.params.commentNum})
+    res.redirect("/api/list")
+    } else{
+          res.write("<script>alert('please input data both of them')</script>")
+          res.write(`<script>window.location="../commentDelete/${req.params.commentNum}"</script>`)
     }
-
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 export default router

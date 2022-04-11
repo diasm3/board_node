@@ -6,23 +6,28 @@ import morgan from "morgan"
 import { engine } from "express-handlebars"
 import router from "./routes/api.js"
 import methodOverride from "method-override"
+import { formatDate,stripTags, truncate } from "./helpers/hbs.js"
+
+// import {  formatDate, stripTags, truncate  } from "./helpers/hbs.js"
 connectDB()
 const app = express()
 
 // express_handlebars 설// Handlebars
+
+// Handlebars Helpers
+
+// Handlebars
 app.engine(
   ".hbs",
-  engine({
-    // helpers: { formatDate, stripTags, truncate, editIcon, select },
-    defaultLayout: "index",
-    extname: ".hbs",
-  })
+  engine({ helpers: { formatDate, stripTags, truncate }, defaultLayout: "index", extname: ".hbs" })
 )
 app.set("view engine", ".hbs")
 
+
+
+
 // config dotenv
 dotenv.config({ path: "./config/config.env" })
-// db = mongoose.connection()
 
 
 

@@ -1,0 +1,24 @@
+<div class="col s4">
+  <div class="card deep-purple darken-1">
+    <div class="card-action">
+      <form action="/api/commentEdit/{{comment.commentNum}}" method="post">
+        <input type="hidden" name="_method" value="PUT" />
+        <input
+          value="{{comment.writer}}"
+          type="text"
+          name="writer"
+          id="writer"
+          placeholder="사용자 이름을 입력하세요"
+        />
+        <textarea
+          type="text"
+          name="body"
+          id="body"
+          placeholder="제목을 입력하세요"
+        >{{comment.body}}</textarea>
+        <input type="submit" value="확인" class="btn" />
+        <a href="/api/read/{{read.number}}" class="btn">취소</a>
+      </form>
+    </div>
+  </div>
+</div>
