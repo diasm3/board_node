@@ -1,0 +1,11 @@
+
+<h1>글수정</h1>
+<form action="/api/edit/{{edit.number}}" method="post">
+  <input type="hidden" name="_method" value="PUT">
+  <input value="{{edit.writer}}" type="text" name="writer" id="writer" placeholder="사용자 이름을 입력하세요" />
+  <input value="{{edit.title}}"type="text" name="title" id="title" placeholder="제목을 입력하세요"/>
+  <textarea  name="body" id="body" cols="30" rows="10">{{edit.body}}</textarea>
+  <div class="row">
+  <input type="submit" value="확인" clss="btn" />
+ <a href="/api/list" class="btn orange">취소</a></div>
+</form>

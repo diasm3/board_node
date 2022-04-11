@@ -1,0 +1,20 @@
+
+<h1>게시물 목록 조회</h1>
+
+<a href="/api/write">글쓰기</a>
+<table>
+    <tr>
+        <td>제목(코멘트수)</td>
+        <td>작성자명</td>
+        <td>작성날짜</td>
+    </tr>
+  <input type="hidden" name="_method" value="delete">
+{{#each board}}
+    <tr>
+        <td>
+            <a href="/api/read/{{number}}">{{title}}[{{comment_count}}]</a><a href="/api/edit/{{number}}"><i class="fas fa-edit"></i></a><a href="/api/delete/{{number}}"><i class="fas fa-trash"></i></a></td>
+        <td>{{writer}}</td>
+        <td>{{createdAt}}</td>
+    </tr>
+{{/each}}
+</table>

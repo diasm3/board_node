@@ -81,7 +81,7 @@ const CommentSchema = new mongoose.Schema({
     writer: {
         type: mongoose.Schema.Types.ObjectId,
         ref : 'UserChema',
-    }
+    },
     articleNumber: {
         type: Number,
         ref : 'BoardSchema',
