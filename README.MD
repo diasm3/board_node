@@ -96,7 +96,12 @@ const CommentSchema = new mongoose.Schema({
 ```
 
 ## API 구조   
+
+
+* Board API
+
 ```javascript
+
 
 app.use('/api', require('./routes/api'))
 
@@ -107,8 +112,8 @@ app.use('/api', require('./routes/api'))
 // 게시물 관련 API
 
 // @Desc : 게시글 목록 조회
-// @Route : GET /api/board
-router.get('/board')
+// @Route : GET /api/list
+router.get('/list')
 
 // @Desc : 게시글 작성  
 // @Route : POST /api/write
@@ -132,7 +137,11 @@ router.put('/edit/:number')
 router.delete('/delete/:number')
 
 
+```
 
+
+* 댓글 관련 API
+```javascript
 
 // 댓글 관련 API
 
@@ -159,9 +168,29 @@ router.put('/commentEdit/:commnetNumber')
 // @Param : number
 router.delete('/commentDelete/:commnetNumber')
 
-
-
 ```
+## Views 구조
+* header.hbs
+* board.hbs
+    - 게시글 목록 조회
+    - Col( 제목(코멘트(수)), 작성자명, 작성날짜, )
+* edit.hbs
+    - 게시글 수정
+    - Col( 제목, 작성자명, 작성날짜, 내용)
+* write.hbs
+    - 게시글 작성
+    - Col( 제목, 작성자명, 작성날짜, 내용)
+* comment.hbs 
+    - 댓글 조회, 작성, 수정, 삭제까지 한번에?
+    - Col( 작성자명, 내용, 작성날짜)
 
 
 
+
+## 필요한 모듈
+* mongoose
+* express
+* dotenv
+* express-handlebars
+* method-override
+* morgan
