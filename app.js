@@ -5,6 +5,7 @@ import connectDB from "./config/db.js"
 import morgan from "morgan"
 import { engine } from "express-handlebars"
 import router from "./routes/api.js"
+import dashboardAPI from "./routes/dashboardAPI.js"
 import methodOverride from "method-override"
 import { formatDate,stripTags, truncate } from "./helpers/hbs.js"
 
@@ -41,6 +42,7 @@ app.use(methodOverride(function (req, res){
     }
 }))
 
+app.use("/", dashboardAPI )
 app.use("/api", router)
 
 
