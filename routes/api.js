@@ -215,7 +215,7 @@ router.delete("/commentDelete/:commentNum", async (req, res) => {
       //   await CommentSchema.remove({ commentNum: req.params.commentNum })
       await CommentSchema.deleteOne({ commentNum: req.params.commentNum })
       res.redirect("/api/list")
-
+      req.redirect(req.originalUrl)
       //   res.write("<script>history.back(true)</script>")
       //   res.write("<script>location.reload(true)</script>")
     } else {
