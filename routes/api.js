@@ -9,11 +9,14 @@ const router = Router()
 // @Desc : 게시글 목록 조회
 // @Route : GET /api/list
 router.get("/list", async (req, res) => {
-  console.log("/list")
   try {
-    const board = await BoardSchema.find({}).sort({ createdAt: -1 }).lean()
-
-    res.render("board/board.hbs", { board })
+    if (!req.query.page) {
+      const board = await BoardSchema.find({}).sort({ createdAt: -1 }).lean()
+      res.render("board/board.hbs", { board })
+    } else {
+      res.write("<script>alert('something problem in server')</script>")
+      res.redirect("/")
+    }
   } catch (err) {
     console.error(err)
   }
@@ -78,8 +81,15 @@ router.get("/read/:number", async (req, res) => {
 // @Param : number
 router.get("/edit/:number", async (req, res) => {
   try {
-    const edit = await BoardSchema.findOne({ number: req.params.number }).lean()
-    res.render("board/edit", { edit })
+    if (req.params.number) {
+      const edit = await BoardSchema.findOne({
+        number: req.params.number,
+      }).lean()
+      res.render("board/edit", { edit })
+    } else {
+      res.write("<script>alert('something worng with your mind')</script>")
+      res.write('<script>window.location="../api/list"</script>')
+    }
   } catch (err) {
     console.error(err)
     res.render("error/404.hbs")
@@ -91,14 +101,19 @@ router.get("/edit/:number", async (req, res) => {
 // @Param : number
 router.put("/edit/:number", async (req, res) => {
   try {
-    await BoardSchema.findOneAndUpdate(
-      { number: req.params.number },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    )
+    if (req.body.title && req.body.body && req.body.writer) {
+      await BoardSchema.findOneAndUpdate(
+        { number: req.params.number },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+    } else {
+      res.write("<script>alert('please checking title and context')</script>")
+      res.write('<script>window.location="../api/list"</script>')
+    }
     res.redirect("/api/list")
   } catch (err) {
     console.error(err)
@@ -135,7 +150,9 @@ router.post("/commentWrite/:articleNumber", increment, async (req, res) => {
       res.redirect("/api/read/" + req.params.articleNumber)
     } else {
       res.write("<script>alert('something worng with your mind')</script>")
-      res.write(`<script>window.location="../read/${req.params.articleNumber}"</script>`)
+      res.write(
+        `<script>window.location="../read/${req.params.articleNumber}"</script>`
+      )
     }
   } catch (err) {
     console.error(err)
@@ -155,6 +172,8 @@ router.get("/commentEdit/:commentNum", async (req, res) => {
       }).lean()
       res.render("board/comment", { comment })
     } else {
+      res.write("<script>alert('something worng with your mind')</script>")
+      res.redirect("/api/list")
     }
   } catch (err) {
     console.error(err)
@@ -168,21 +187,20 @@ router.get("/commentEdit/:commentNum", async (req, res) => {
 // @Rules : if body is None "댓글 내용을 입력해주세요" return
 router.put("/commentEdit/:commentNum", async (req, res) => {
   try {
-      if(req.body.body && req.body.writer){
-    await CommentSchema.findOneAndUpdate(
-      { commentNum: req.params.commentNum },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    )
-    res.redirect("/api/list")
-      } else{
-          res.write("<script>alert('please input data both of them')</script>")
-          res.write('<script>window.location="../api/list"</script>')
-
-      }
+    if (req.body.body && req.body.writer) {
+      await CommentSchema.findOneAndUpdate(
+        { commentNum: req.params.commentNum },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+      res.redirect("/api/list")
+    } else {
+      res.write("<script>alert('please input data both of them')</script>")
+      res.write('<script>window.location="../api/list"</script>')
+    }
   } catch (err) {
     console.error(err)
   }
@@ -194,11 +212,15 @@ router.put("/commentEdit/:commentNum", async (req, res) => {
 router.delete("/commentDelete/:commentNum", async (req, res) => {
   try {
     if (req.params.commentNum) {
-    await CommentSchema.remove({ commentNum: req.params.commentNum})
-    res.redirect("/api/list")
-    } else{
-          res.write("<script>alert('please input data both of them')</script>")
-          res.write(`<script>window.location="../commentDelete/${req.params.commentNum}"</script>`)
+      //   await CommentSchema.remove({ commentNum: req.params.commentNum })
+      await CommentSchema.deleteOne({ commentNum: req.params.commentNum })
+      res.redirect("/api/list")
+
+      //   res.write("<script>history.back(true)</script>")
+      //   res.write("<script>location.reload(true)</script>")
+    } else {
+      res.write("<script>alert('something in your mind')</script>")
+      res.write(`<script>window.location="../api/list"</script>`)
     }
   } catch (err) {
     console.error(err)
