@@ -4,7 +4,8 @@ import dotenv from "dotenv"
 import connectDB from "./config/db.js"
 import morgan from "morgan"
 import { engine } from "express-handlebars"
-import router from "./routes/api.js"
+import commentRouter from "./routes/commentApi.js"
+import boardRouter from "./routes/boardApi.js"
 import dashboardAPI from "./routes/dashboardAPI.js"
 import methodOverride from "method-override"
 import { formatDate,stripTags, truncate } from "./helpers/hbs.js"
@@ -13,9 +14,6 @@ import { formatDate,stripTags, truncate } from "./helpers/hbs.js"
 connectDB()
 const app = express()
 
-// express_handlebars 설// Handlebars
-
-// Handlebars Helpers
 
 // Handlebars
 app.engine(
@@ -24,9 +22,6 @@ app.engine(
 )
 app.set("view engine", ".hbs")
 
-
-
-
 // config dotenv
 dotenv.config({ path: "./config/config.env" })
 
@@ -34,11 +29,6 @@ dotenv.config({ path: "./config/config.env" })
 // app.use(function(req, res){
 //   res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
 // });
-
-
-
-출처: https://wowan.tistory.com/59 [DevWarehouse]
-
 app.use(morgan("dev"))
 app.use(express.urlencoded({ extended: false }))
 app.use(methodOverride(function (req, res){ 
@@ -50,7 +40,8 @@ app.use(methodOverride(function (req, res){
 }))
 
 app.use("/", dashboardAPI )
-app.use("/api", router)
+app.use("/api", [commentRouter, boardRouter])
+// app.use("/board", new_boardAPI)
 
 
 const PORT = process.env.PORT || 5000

@@ -1,5 +1,4 @@
 
-import mongoose from "mongoose"
 import IncSchema from "../models/IncSchema.js"
 
 export default (req, res, next) => {
