@@ -31,6 +31,13 @@ app.set("view engine", ".hbs")
 dotenv.config({ path: "./config/config.env" })
 
 
+// app.use(function(req, res){
+//   res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+// });
+
+
+
+출처: https://wowan.tistory.com/59 [DevWarehouse]
 
 app.use(morgan("dev"))
 app.use(express.urlencoded({ extended: false }))
